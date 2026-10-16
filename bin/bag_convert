@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Run the converter with ROS 2 Humble's system Python (conda's python3 cannot import rclpy).
+# Needs a shell with ROS 2 and mecanumbot_ws sourced (~/.bashrc does both).
+set -euo pipefail
+REPO="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+export PYTHONPATH="${REPO}${PYTHONPATH:+:${PYTHONPATH}}"
+exec /usr/bin/python3 -m bag_converter "$@"
