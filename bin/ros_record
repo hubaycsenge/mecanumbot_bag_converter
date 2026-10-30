@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Record the usual MecanumBot topics plus the LED state into the leading study's bag folder.
+#
+#   ros_record [any further ros2 bag record options]
+#
+# LED_POLL_HZ sets how often the LED state is read (default 5). Stop with Ctrl-C.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+BAG_DIR="$HOME/Videos/Ethology/Leading/bag_debug"
+
+TOPICS=(
+    /mecanumbot/people_fusion
+    /mecanumbot/subject_pose
+    /tf
+    /map
+    /mecanumbot/cam_people_detections/debug_image/compressed
+    /mecanumbot/scan
+    /mecanumbot/dets
+    /mecanumbot/cam_people_detections
+    /tf_static
+    /mecanumbot/led_status
+)
+
+mkdir -p "$BAG_DIR"
+cd "$BAG_DIR"
+
+"$HERE/led_status_poller.py" "${LED_POLL_HZ:-5}" &
+POLLER=$!
+trap 'kill "$POLLER" 2>/dev/null || true' EXIT
+
+ros2 bag record "${TOPICS[@]}" "$@"

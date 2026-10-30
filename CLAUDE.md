@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Converter for MecanumBot ROS 2 bags: `render` (RViz config → top-down .mp4, offline),
+Recorder and converter for MecanumBot ROS 2 bags. `bin/ros_record` records them; `bin/bag_convert` converts them: `render` (RViz config → top-down .mp4, offline),
 `capture` (real RViz2 screen-recorded during `ros2 bag play`), `images` (image topics →
 frames + index.csv and/or .mp4). The user-facing docs are in `README.md`.
 
@@ -12,7 +12,8 @@ frames + index.csv and/or .mp4). The user-facing docs are in `README.md`.
   is no longer enough on this machine). The tests are pure Python: keep ROS imports deferred
   inside functions (`bag_io` does this) so they keep running without a sourced ROS.
 - Lint: `ruff check .` (config in `pyproject.toml`).
-- Use the scratchpad or `/tmp` for test outputs, never the bag directories.
+- Use the scratchpad or `/tmp` for test outputs, never the bag directories (the leading study's
+  are in `~/Videos/Ethology/Leading/bag_debug/`, whose `process_raw_footage.sh` calls `bin/bag_convert`).
 
 ## Layout
 
@@ -26,6 +27,12 @@ frames + index.csv and/or .mp4). The user-facing docs are in `README.md`.
 | `images.py` | image decoding (no cv_bridge, which is NumPy-1-only here), export, resampling |
 | `capture.py` | Xvfb/Xephyr + rviz2 + `ros2 bag play` + ffmpeg x11grab |
 | `video.py` | ffmpeg (libx264, yuv420p) writer |
+
+`bin/ros_record` (the `ros_record` alias) records the usual topics into
+`~/Videos/Ethology/Leading/bag_debug/`. Humble cannot record services, so it also runs
+`bin/led_status_poller.py`, which republishes `get_led_status` as `/mecanumbot/led_status`
+(`std_msgs/Int8MultiArray`, 5 Hz by default, `LED_POLL_HZ`). It imports ROS at the top, so keep it
+out of the `bag_converter` package.
 
 ## Things that must stay true
 

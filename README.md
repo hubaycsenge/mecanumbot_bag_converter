@@ -21,6 +21,23 @@ bin/bag_convert capture ~/rosbag2_2026_10_16-09_47_02   # real RViz, screen-reco
 `mecanumbot_msgs` types importable; topics whose type cannot be imported are skipped with a
 warning. Bags may be given as the directory, its `metadata.yaml` or a `.db3`/`.mcap` file.
 
+## Recording
+
+```bash
+bin/ros_record                  # the `ros_record` alias
+LED_POLL_HZ=10 bin/ros_record   # read the LED state more often
+```
+
+Records the usual topics into `~/Videos/Ethology/Leading/bag_debug/`; further options go to
+`ros2 bag record`. Humble cannot record services, so `bin/led_status_poller.py` calls
+`get_led_status` (5 Hz by default) and publishes each answer on `/mecanumbot/led_status`
+(`std_msgs/Int8MultiArray`), whose time in the bag is the state's time:
+
+    [fl_mode, fl_color, fr_mode, fr_color, br_mode, br_color, bl_mode, bl_color]
+
+All `-1` means the LED node could not read the Arduino's answer. The values are the state last
+commanded to the Arduino, without the progress fill, which `get_led_status` does not return.
+
 ## 1. RViz → mp4
 
 There are two ways to do it.
